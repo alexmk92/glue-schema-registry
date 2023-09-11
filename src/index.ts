@@ -113,6 +113,26 @@ export class GlueSchemaRegistry<T> {
     return existingschema
   }
 
+  public async find(schemaName: string, schemaVersion: undefined | number = undefined) {
+    const versionprops: gluesdk.SchemaVersionNumber = {}
+    if (!schemaVersion) {
+      versionprops.LatestVersion = true
+    } else {
+      versionprops.VersionNumber = schemaVersion
+    }
+
+    const schema = await this.gc.send(
+      new gluesdk.GetSchemaVersionCommand({
+        SchemaVersionNumber: versionprops,
+        SchemaId: {
+          SchemaName: schemaName,
+        },
+      }),
+    )
+
+    return schema
+  }
+
   /**
    * Creates a new schema in the AWS Glue Schema Registry.
    * Note: do not use createSchema if you want to create a new version of an existing schema.
